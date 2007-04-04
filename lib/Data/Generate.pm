@@ -1,4 +1,4 @@
-#!/usr/local/ActivePerl-5.8/bin/perl -w 
+#!/usr/bin/perl -w 
 ################################################################################
 # package Data::Generate
 # Description: returns an SQL-Data generator object 
@@ -10,7 +10,7 @@
 # output data : output data is retrieved by subsequent concatenation 
 # of value terms in a value chain. If more than one value chains are defined,
 # then, based on weigthing, each chain at turn will be "asked" to return an 
-# output value, until an array of the requested cardinality is filled. 
+# output value, until an array of the requested cardinality is filled.  
 # 
 ################################################################################
 package Data::Generate;
@@ -43,7 +43,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
                                   ) ] );
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw();
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 
 $Data::Generate::Parser=undef;
@@ -160,7 +160,7 @@ sub new
     $self->reset_actual_vchain();
     return $self;
 }
-
+ 
 
 
 ################################################################################
@@ -1611,16 +1611,42 @@ sub calculate_occupation_levels
 sub get_degrees_of_freedom 
 {
     my $self = shift;
-    return $self->{card};
+    my $weigthed_card=undef;
+    foreach my $vchain_ref (@{$self->{vchain_array}})
+    {
+      confess " weigth undefined " unless defined  $vchain_ref->{weigth} &&
+                  defined $vchain_ref->{vchain_card};
+      if ($vchain_ref->{weigth} >0.0001)
+      {
+          $vchain_ref->{weigthed_card}=$vchain_ref->{vchain_card}/
+                 $vchain_ref->{weigth};      
+      }
+      else
+      {
+         $vchain_ref->{weigthed_card}=10000 
+      }
+      $vchain_ref->{weigthed_card}=1 if $vchain_ref->{weigthed_card}<1;  
+      $weigthed_card = $vchain_ref->{weigthed_card}
+         unless defined $weigthed_card;                        
+      $weigthed_card = $vchain_ref->{weigthed_card}
+         if  $weigthed_card   >  $vchain_ref->{weigthed_card} ;                        
+    }	
+    
+    # workaround to handle integers numbers converted to float and back
+    if ( int($weigthed_card)+1-$weigthed_card <1e-9)
+    {
+      return int($weigthed_card)+1;
+    }
+    return int($weigthed_card);
 }
 
 
 
 
 ################################################################################
-# sub get_degrees_of_freedom for a vchain
+# sub calculate_vchain_list_degrees_of_freedom
 # Description:
-# get maximal cardinality 
+# calculate maximal cardinality for a vchain 
 #
 ################################################################################
 sub calculate_vchain_list_degrees_of_freedom 
@@ -1638,11 +1664,10 @@ sub calculate_vchain_list_degrees_of_freedom
 }
 
 
-
 ################################################################################
-# sub get_degrees_of_freedom
+# sub calculate_degrees_of_freedom
 # Description:
-# get maximal cardinality 
+# calculate maximal cardinality of the generation rules
 #
 ################################################################################
 sub calculate_degrees_of_freedom 
@@ -1655,9 +1680,9 @@ sub calculate_degrees_of_freedom
 
 
 ################################################################################
-# sub get_degrees_of_freedom
+# sub calculate_weigth
 # Description:
-# get maximal cardinality 
+# normalize weigth so that total is 100% 
 #
 ################################################################################
 sub calculate_weigth 
@@ -1850,6 +1875,7 @@ sub vcol_chain
 # sub parse
 # Description:
 # parse given text.
+# return either an error or a Data::Generate object
 # 
 ################################################################################
 sub parse($)

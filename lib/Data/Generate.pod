@@ -1,14 +1,14 @@
 
 =pod
 
-=head1 NAME
+=head1 NAME 
 
 Data::Generate - Create various types of synthetic data by parsing 
 "regex-like" data creation rules. 
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =head1 SYNOPSIS
 
@@ -23,7 +23,7 @@ Version 0.01
 
  # parse the rule and return a generator object if rule is valid.
  my $generator= Data::Generate::parse($input_rule) or die "error".$!;
- 
+
  # prints the maximal number of unique data that can be generated.
  print $generator->get_degrees_of_freedom(); 
 
@@ -63,6 +63,34 @@ Version 0.01
  #   -> returns a set of date values (format 'YYYYMMDD HH:MI:SS') 
  #      corresponding to  the 7th and all Thursdays and Fridays 
  #      of November 1999.    
+
+=head1 FUNCTIONS
+
+=over 
+
+=item B<parse(rules)> 
+
+  Parse given data generation rules and load them into a Data::Generate object.
+  Return either an error or a Data::Generate object.
+
+=back
+
+=head1 METHODS
+
+=over 
+
+=item B<$self-E<gt>get_degrees_of_freedom()> 
+
+  Return an integer scalar containig the maximal number of unique values 
+  that can be produced from the current Data::Generate object.  
+
+=item B<$self-E<gt>get_unique_data(nr_of_values)> 
+
+  Return an array of unique values with "nr_of_values" elements.
+  Issue a warning and produce only $self->get_degrees_of_freedom() values
+  if nr_of_values > $self->get_degrees_of_freedom(). 
+
+=back
 
 
 =head1 DESCRIPTION
@@ -632,6 +660,85 @@ I<Examples>:
   # ... 1/4 for the year 1998 and 1/4 for the years 2001 and 2006.
 
 
+=head1 INTERNAL METHODS
+
+Here a list of the internal methods of the module.
+These methods are not supposed to be called by the user.
+
+=over
+
+=item - add_term_range
+
+=item - add_value_column
+
+=item - add_weekday_term_range
+
+=item - bind_actual_vchain
+
+=item - bind_actual_vcol
+
+=item - bind_vchain
+
+=item - bind_vcol_literal
+
+=item - bind_vcol_range
+
+=item - calculate_degrees_of_freedom
+
+=item - calculate_occupation_levels
+
+=item - calculate_vchain_list_degrees_of_freedom
+
+=item - calculate_vchain_list_weigth
+
+=item - calculate_weigth
+
+=item - check_input_card
+
+=item - check_input_limits
+
+=item - check_range_order
+
+=item - check_reverse_flag
+
+=item - fisher_yates_shuffle
+
+=item - get_value_column_reverse
+
+=item - is_valid
+
+=item - map_vchain_indexes
+
+=item - merge_vchain_float_lists
+
+=item - new
+
+=item - load_parser
+
+=item - reset_actual_vchain
+
+=item - reset_actual_vcol
+
+=item - set_occupation_ratio
+
+=item - vchain_date_fraction_process
+
+=item - vchain_float_process
+
+=item - vchain_fraction_process
+
+=item - vchain_integer_process
+
+=item - vchain_number_reprocess
+
+=item - vcol_chain
+
+=item - vcol_date_process
+
+=item - vcol_file_process
+
+=back
+
 =head1 DEPENDENCIES
 
 Please install following libraries previous running this module:
@@ -680,6 +787,17 @@ When multiple rules are used (ex ... [14] (36%)|[1-2](64%) ... )
 duplicates are only detected at the end, just before output creation.
 This effect may lead to wrong cardinality and to wrong data distributions.
 When this happens the program generates a warning.
+
+=head1 HISTORY
+
+=over
+
+=item - 0.01 Initial version
+
+=item - 0.02 Correct bug in calculation of degrees of freedom 
+
+=back
+
 
 =head1 ACKNOWLEDGEMENTS
 

@@ -10,6 +10,8 @@ t/01basic.t
 t/02quantifiers.t
 t/03combined.t
 t/04vchain_list.t
+t/05pod.t
+t/06pod_coverage.t
 t/datelist_01.txt
 t/numberlist_01.txt
 t/numberlist_02.txt
